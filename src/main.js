@@ -234,6 +234,9 @@ document.addEventListener("DOMContentLoaded", () => {
     // Mini Toolbar Bindings
     document.getElementById('miniSimulateBtn').addEventListener('click', runSimulation);
     document.getElementById('miniBroadcastBtn').addEventListener('click', runBroadcast);
+    document.getElementById('miniStressBtn').addEventListener('click', () => {
+        document.getElementById('stressTestBtn').click();
+    });
     document.getElementById('miniSaveBtn').addEventListener('click', () => {
         document.getElementById('saveBtn').click();
     });
