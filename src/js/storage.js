@@ -87,12 +87,37 @@ export class StorageManager {
                 if (parsed.nodes && parsed.links) {
                     nodesData.length = 0;
                     linksData.length = 0;
-                    parsed.nodes.forEach(n => nodesData.push(n));
-                    parsed.links.forEach(l => linksData.push(l));
+                    
+                    parsed.nodes.forEach(n => {
+                        nodesData.push({
+                            id: n.id,
+                            type: n.type,
+                            desc: n.desc || '',
+                            offline: n.offline || false,
+                            x: n.x,
+                            y: n.y,
+                            fx: n.fx !== undefined ? n.fx : null,
+                            fy: n.fy !== undefined ? n.fy : null
+                        });
+                    });
+
+                    parsed.links.forEach(l => {
+                        const sourceId = typeof l.source === 'object' ? l.source.id : l.source;
+                        const targetId = typeof l.target === 'object' ? l.target.id : l.target;
+                        linksData.push({
+                            id: l.id,
+                            source: sourceId,
+                            target: targetId,
+                            type: l.type || 'wan',
+                            bandwidth: l.bandwidth || 'normal',
+                            broken: l.broken || false,
+                            label: l.label || ''
+                        });
+                    });
                     
                     this.history.saveState();
                     this.topology.updateGraph();
-                    this.topology.showStatus("Topologia carregada!", "success");
+                    this.topology.showStatus("Topologia carregada com sucesso!", "success");
                 } else {
                     this.topology.showStatus("Arquivo JSON inválido.", "error");
                 }
