@@ -1,16 +1,17 @@
 import './css/style.css';
-import { createIcons, Info, Play, ZoomIn, ZoomOut, Maximize, Activity, Cpu, Monitor, Terminal as TerminalIcon, ChevronDown, ChevronUp, X, Undo2, Redo2, Table, Trash2, Settings, Radio, Save, Upload, BarChart2, Edit2, Square } from 'lucide';
+import { createIcons, Info, Play, ZoomIn, ZoomOut, Maximize, Activity, Cpu, Monitor, Terminal as TerminalIcon, ChevronDown, ChevronUp, X, Undo2, Redo2, Table, Trash2, Settings, Radio, Save, Upload, BarChart2, Edit2, Square, Menu, PanelLeftClose } from 'lucide';
 import { NetworkTopology } from './js/topology.js';
 import { PacketSimulation } from './js/simulation.js';
 import { Terminal } from './js/terminal.js';
 import { RoutingTable } from './js/routing.js';
 import { HistoryManager } from './js/history.js';
 import { StorageManager } from './js/storage.js';
+import { nodesData, linksData } from './js/data.js';
 
 // Inicializar ícones do Lucide
 createIcons({
   icons: {
-    Info, Play, ZoomIn, ZoomOut, Maximize, Activity, Cpu, Monitor, Terminal: TerminalIcon, ChevronDown, ChevronUp, X, Undo2, Redo2, Table, Trash2, Settings, Radio, Save, Upload, BarChart2, Edit2, Square
+    Info, Play, ZoomIn, ZoomOut, Maximize, Activity, Cpu, Monitor, Terminal: TerminalIcon, ChevronDown, ChevronUp, X, Undo2, Redo2, Table, Trash2, Settings, Radio, Save, Upload, BarChart2, Edit2, Square, Menu, PanelLeftClose
   }
 });
 
@@ -22,6 +23,38 @@ topology.history = history;
 const simulation = new PacketSimulation(topology, terminal);
 const storage = new StorageManager(topology, history);
 
+// === Dashboard: função global de atualização ===
+function updateDashboard() {
+    const totalNodes = nodesData.length;
+    const totalLinks = linksData.length;
+    const brokenLinks = linksData.filter(l => l.broken).length;
+    const totalRouters = nodesData.filter(n => n.type === 'router').length;
+    const onlineRouters = nodesData.filter(n => n.type === 'router' && !n.offline).length;
+    const fiberCount = linksData.filter(l => l.bandwidth === 'fast').length;
+    const copperCount = linksData.filter(l => !l.bandwidth || l.bandwidth === 'normal').length;
+    const radioCount = linksData.filter(l => l.bandwidth === 'slow').length;
+
+    const set = (id, val) => { const el = document.getElementById(id); if(el) el.textContent = val; };
+    set('dashTotalNodes', totalNodes);
+    set('dashTotalLinks', totalLinks);
+    set('dashBrokenLinks', brokenLinks);
+    set('dashOnlineRouters', `${onlineRouters}/${totalRouters}`);
+    set('dashFiberCount', fiberCount);
+    set('dashCopperCount', copperCount);
+    set('dashRadioCount', radioCount);
+    set('dashActiveTraff', simulation.activeTrafficCount || 0);
+}
+
+// Encadear onGraphUpdated ANTES do primeiro updateGraph
+const originalOnGraphUpdated = topology.onGraphUpdated;
+topology.onGraphUpdated = () => {
+    if (originalOnGraphUpdated) originalOnGraphUpdated();
+    updateDashboard();
+};
+
+// Timer para tráfego ativo (atualiza a cada 500ms)
+setInterval(updateDashboard, 500);
+
 // Menu de contexto customizado
 const contextMenu = document.getElementById('contextMenu');
 let contextNodeId = null;
@@ -32,17 +65,14 @@ topology.onNodeContextMenu = (event, nodeData) => {
     contextNodeId = nodeData.id;
     contextNodeType = nodeData.type;
     
-    // Position menu
     contextMenu.style.left = `${event.pageX}px`;
     contextMenu.style.top = `${event.pageY}px`;
     contextMenu.classList.remove('hidden');
     
-    // Agora todos (roteadores e dispositivos) podem ver a tabela de rotas
     const tableBtn = document.getElementById('ctxRoutingTable');
     tableBtn.style.display = 'flex';
 };
 
-// Hide context menu on global click
 document.addEventListener('click', (e) => {
     if(!contextMenu.contains(e.target)) {
         contextMenu.classList.add('hidden');
@@ -72,6 +102,7 @@ document.getElementById('ctxRenameNode').addEventListener('click', () => {
 });
 
 document.addEventListener("DOMContentLoaded", () => {
+    // Primeiro render (já vai disparar updateDashboard via onGraphUpdated)
     topology.updateGraph('all');
 
     document.getElementById('filterSelect').addEventListener('change', (e) => {
@@ -229,32 +260,4 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
     }
-
-    // === Dashboard Updater ===
-    function updateDashboard() {
-        const totalNodes = nodesData.length;
-        const totalLinks = linksData.length;
-        const brokenLinks = linksData.filter(l => l.broken).length;
-        const onlineRouters = nodesData.filter(n => n.type === 'router' && !n.offline).length;
-        const fiberCount = linksData.filter(l => l.bandwidth === 'fast').length;
-        const copperCount = linksData.filter(l => !l.bandwidth || l.bandwidth === 'normal').length;
-        const radioCount = linksData.filter(l => l.bandwidth === 'slow').length;
-
-        const set = (id, val) => { const el = document.getElementById(id); if(el) el.textContent = val; };
-        set('dashTotalNodes', totalNodes);
-        set('dashTotalLinks', totalLinks);
-        set('dashBrokenLinks', brokenLinks);
-        set('dashOnlineRouters', onlineRouters);
-        set('dashFiberCount', fiberCount);
-        set('dashCopperCount', copperCount);
-        set('dashRadioCount', radioCount);
-    }
-
-    // Atualizar dashboard quando o grafo muda
-    const originalOnGraphUpdated = topology.onGraphUpdated;
-    topology.onGraphUpdated = () => {
-        if (originalOnGraphUpdated) originalOnGraphUpdated();
-        updateDashboard();
-    };
-    updateDashboard();
 });
