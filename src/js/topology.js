@@ -231,8 +231,12 @@ export class NetworkTopology {
 
         // Visible line
         linkEnter.append("line")
-            .attr("class", d => `visible-link ${d.type}-link ${d.broken ? 'link-broken' : ''}`)
-            .style("stroke-dasharray", d => d.bandwidth === 'slow' ? '5,5' : 'none')
+            .attr("class", d => {
+                let techClass = 'link-normal';
+                if(d.bandwidth === 'fast') techClass = 'link-fiber';
+                else if(d.bandwidth === 'slow') techClass = 'link-radio';
+                return `visible-link ${d.type}-link ${techClass} ${d.broken ? 'link-broken' : ''}`;
+            })
             .style("pointer-events", "none");
 
         const labelGroup = linkEnter.append("g").attr("class", "link-label-group");
@@ -242,13 +246,17 @@ export class NetworkTopology {
             .attr("class", "link-label")
             .attr("text-anchor", "middle")
             .attr("dominant-baseline", "central")
-            .text(d => d.label);
+            .text(d => d.label || "");
 
         this.link = linkEnter.merge(linkSelection);
         
         this.link.select(".visible-link")
-            .attr("class", d => `visible-link ${d.type}-link ${d.broken ? 'link-broken' : ''}`)
-            .style("stroke-dasharray", d => d.bandwidth === 'slow' ? '5,5' : 'none');
+            .attr("class", d => {
+                let techClass = 'link-normal';
+                if(d.bandwidth === 'fast') techClass = 'link-fiber';
+                else if(d.bandwidth === 'slow') techClass = 'link-radio';
+                return `visible-link ${d.type}-link ${techClass} ${d.broken ? 'link-broken' : ''}`;
+            });
 
         // Update labels dynamically in case they changed
         this.link.select(".link-label")

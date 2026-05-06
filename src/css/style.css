@@ -363,6 +363,19 @@ body {
   cursor: not-allowed;
 }
 
+.link-fiber {
+  stroke: #06b6d4 !important; /* Cyan brilhante */
+}
+
+.link-normal {
+  stroke: #64748b !important; /* Cinza escuro */
+}
+
+.link-radio {
+  stroke: #d97706 !important; /* Laranja escuro / Amarelo queimado */
+  stroke-dasharray: 6, 4 !important; /* Tracejado para rádio */
+}
+
 .link-label {
   font-family: var(--font-family);
   font-size: 10px;
