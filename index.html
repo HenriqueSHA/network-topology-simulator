@@ -100,8 +100,8 @@
                     <button class="accordion-header">
                         <i data-lucide="info"></i> Como Funciona?
                     </button>
-                    <div class="accordion-content">
-                        <p>Esta rede utiliza o protocolo <strong>OSPF</strong>. O caminho é definido pela Velocidade (Largura de Banda) do cabo (Fibra é mais rápido que Rádio).</p>
+                    <div class="accordion-content" id="protocolInfoContent">
+                        <p>Esta rede utiliza o protocolo <strong id="infoProtocolName">OSPF</strong>. <span id="infoProtocolDesc">O caminho é definido pela Velocidade (Largura de Banda) do cabo (Fibra é mais rápido que Rádio).</span></p>
                         <p><strong>Resiliência:</strong> Temos rotas redundantes. Clique num link para <span class="text-danger">"quebrá-lo"</span> e simule novamente para ver o desvio!</p>
                     </div>
                 </div>
@@ -191,10 +191,41 @@
     </div>
 
     <!-- Menu de Contexto Customizado -->
-    <div id="contextMenu" class="glass-panel hidden" style="position: absolute; z-index: 1000; border-radius: 8px; padding: 5px; min-width: 150px;">
+    <div id="contextMenu" class="glass-panel hidden" style="position: absolute; z-index: 1000; border-radius: 8px; padding: 5px; min-width: 180px;">
         <button id="ctxRoutingTable" class="context-btn"><i data-lucide="table"></i> Tabela de Roteamento</button>
         <button id="ctxRenameNode" class="context-btn"><i data-lucide="edit-2"></i> Renomear</button>
+        <button id="ctxChangeIp" class="context-btn"><i data-lucide="activity"></i> Alterar IP do Link</button>
         <button id="ctxDeleteNode" class="context-btn" style="color: var(--danger);"><i data-lucide="trash-2"></i> Excluir Nó</button>
+    </div>
+
+    <!-- Modal de Input Customizado (substitui prompt nativo) -->
+    <div id="customInputModal" class="modal hidden">
+        <div class="modal-content glass-panel" style="max-width: 420px;">
+            <div class="modal-header">
+                <h3 id="customInputTitle">Entrada</h3>
+                <button id="customInputCloseBtn" class="icon-btn"><i data-lucide="x"></i></button>
+            </div>
+            <div class="modal-body">
+                <p id="customInputDescription" style="color: var(--text-muted); font-size: 13px; margin: 0 0 16px 0;"></p>
+                
+                <!-- Modo Input de Texto -->
+                <div id="customInputTextGroup" class="control-group">
+                    <label id="customInputLabel" for="customInputField">Valor:</label>
+                    <input type="text" id="customInputField" class="glass-input" placeholder="" autocomplete="off">
+                </div>
+
+                <!-- Modo Select (para velocidade do cabo) -->
+                <div id="customInputSelectGroup" class="control-group" style="display: none;">
+                    <label id="customSelectLabel" for="customSelectField">Opção:</label>
+                    <select id="customSelectField" class="glass-input glass-select"></select>
+                </div>
+
+                <div style="display: flex; gap: 10px; margin-top: 20px; justify-content: flex-end;">
+                    <button id="customInputCancelBtn" class="secondary-btn" style="width: auto; padding: 10px 24px; font-size: 14px;">Cancelar</button>
+                    <button id="customInputConfirmBtn" class="primary-btn" style="width: auto; padding: 10px 24px; font-size: 14px;">Confirmar</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     

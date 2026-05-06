@@ -1,5 +1,6 @@
 import * as d3 from 'd3';
 import { nodesData, linksData } from './data.js';
+import { openInputModal } from './customModal.js';
 
 export class NetworkTopology {
     constructor(svgSelector) {
@@ -216,14 +217,23 @@ export class NetworkTopology {
                     this.showStatus(`Link ${d.source.id || d.source} - ${d.target.id || d.target} ${d.broken ? 'DERRUBADO!' : 'RESTABELECIDO'}`, d.broken ? 'error' : 'info');
                 }
             })
-            .on("contextmenu", (event, d) => {
+            .on("contextmenu", async (event, d) => {
                 event.preventDefault();
-                let speedInput = prompt("Alterar Velocidade do Link:\n1 = Fibra (Rápido)\n2 = Normal\n3 = Rádio/Satélite (Lento)", d.bandwidth === 'fast' ? "1" : (d.bandwidth === 'slow' ? "3" : "2"));
-                if (speedInput === "1") d.bandwidth = 'fast';
-                else if (speedInput === "3") d.bandwidth = 'slow';
-                else if (speedInput === "2") d.bandwidth = 'normal';
-                else return;
-                
+                const currentBw = d.bandwidth === 'fast' ? 'fast' : (d.bandwidth === 'slow' ? 'slow' : 'normal');
+                const result = await openInputModal({
+                    title: 'Velocidade do Link',
+                    description: `Alterar tecnologia do cabo entre ${d.source.id || d.source} e ${d.target.id || d.target}.`,
+                    label: 'Tecnologia:',
+                    mode: 'select',
+                    selectOptions: [
+                        { value: 'fast', label: '🟢 Fibra Óptica (Rápido)' },
+                        { value: 'normal', label: '⚪ Cobre / Par Trançado (Normal)' },
+                        { value: 'slow', label: '🟠 Rádio / Satélite (Lento)' }
+                    ],
+                    selectedValue: currentBw
+                });
+                if (result === null) return;
+                d.bandwidth = result;
                 if(this.history) this.history.saveState();
                 this.updateGraph();
                 this.showStatus("Velocidade do link atualizada!", "info");
@@ -393,7 +403,7 @@ export class NetworkTopology {
         d.fx = event.x; d.fy = event.y;
     }
 
-    dragended(event, d) {
+    async dragended(event, d) {
         if(this.drawingLink) {
             this.drawingLink = false;
             this.tempLine.style("opacity", 0);
@@ -404,18 +414,33 @@ export class NetworkTopology {
             if(target) {
                 const isWan = d.type === 'router' && target.type === 'router';
                 const type = isWan ? 'wan' : 'lan';
+
+                // Pedir IP via modal customizado
+                const userIp = await openInputModal({
+                    title: 'Endereço IP da Conexão',
+                    description: `Definir IP para o link entre ${d.id} e ${target.id}.`,
+                    label: 'Endereço IP:',
+                    defaultValue: isWan ? 'Auto-WAN' : 'Auto-LAN',
+                    placeholder: 'Ex: 10.0.1.0/30'
+                });
+                if(userIp === null) return;
                 
-                // Pedir IP via prompt
-                let userIp = prompt("Digite o IP para esta conexão:", isWan ? "Auto-WAN" : "Auto-LAN");
-                if(userIp === null) return; 
-                if(userIp.trim() === "") userIp = isWan ? "Auto-WAN" : "Auto-LAN";
-                
-                // Pedir Velocidade
+                // Pedir Velocidade via modal customizado
                 let bandwidth = 'normal';
                 if (isWan) {
-                    let speedInput = prompt("Velocidade do Link WAN:\n1 = Fibra (Rápido)\n2 = Normal\n3 = Rádio/Satélite (Lento)", "2");
-                    if (speedInput === "1") bandwidth = 'fast';
-                    else if (speedInput === "3") bandwidth = 'slow';
+                    const bwResult = await openInputModal({
+                        title: 'Tecnologia do Cabo',
+                        description: `Selecione a tecnologia física deste link WAN.`,
+                        label: 'Tecnologia:',
+                        mode: 'select',
+                        selectOptions: [
+                            { value: 'fast', label: '🟢 Fibra Óptica (Rápido)' },
+                            { value: 'normal', label: '⚪ Cobre / Par Trançado (Normal)' },
+                            { value: 'slow', label: '🟠 Rádio / Satélite (Lento)' }
+                        ],
+                        selectedValue: 'normal'
+                    });
+                    if (bwResult !== null) bandwidth = bwResult;
                 } else {
                     bandwidth = 'fast'; // LAN is fast by default
                 }
@@ -425,12 +450,12 @@ export class NetworkTopology {
                     source: d.id,
                     target: target.id,
                     type: type,
-                    label: userIp,
+                    label: userIp.trim() || (isWan ? 'Auto-WAN' : 'Auto-LAN'),
                     bandwidth: bandwidth,
                     broken: false
                 });
                 
-                this.showStatus("Nova conexão criada com OSPF ativado!", "info");
+                this.showStatus("Nova conexão criada!", "info");
                 if(this.history) this.history.saveState();
                 this.updateGraph();
             }
