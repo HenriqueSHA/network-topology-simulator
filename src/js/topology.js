@@ -228,11 +228,24 @@ export class NetworkTopology {
                     selectOptions: [
                         { value: 'fast', label: '🟢 Fibra Óptica (Rápido)' },
                         { value: 'normal', label: '⚪ Cobre / Par Trançado (Normal)' },
-                        { value: 'slow', label: '🟠 Rádio / Satélite (Lento)' }
+                        { value: 'slow', label: '🟠 Rádio / Satélite (Lento)' },
+                        { value: 'delete', label: '❌ Apagar Link' }
                     ],
                     selectedValue: currentBw
                 });
                 if (result === null) return;
+                
+                if (result === 'delete') {
+                    const linkIndex = linksData.findIndex(l => l.id === d.id);
+                    if (linkIndex > -1) {
+                        linksData.splice(linkIndex, 1);
+                        if(this.history) this.history.saveState();
+                        this.updateGraph();
+                        this.showStatus(`Link apagado com sucesso.`, 'warn');
+                    }
+                    return;
+                }
+                
                 d.bandwidth = result;
                 if(this.history) this.history.saveState();
                 this.updateGraph();
