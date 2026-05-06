@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visualização de Rede Autônoma - Dark Premium</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div id="app" class="dark-theme">
+        <aside class="sidebar glass-panel">
+            <div class="sidebar-header">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <h2>Topologia <span id="protocolTitle" class="neon-text">OSPF</span></h2>
+                    <div class="history-controls">
+                        <button id="undoBtn" class="icon-btn" title="Desfazer" disabled><i data-lucide="undo-2"></i></button>
+                        <button id="redoBtn" class="icon-btn" title="Refazer" disabled><i data-lucide="redo-2"></i></button>
+                        <button id="saveBtn" class="icon-btn" title="Salvar Projeto"><i data-lucide="save"></i></button>
+                        <button id="loadBtn" class="icon-btn" title="Carregar Projeto"><i data-lucide="upload"></i></button>
+                        <input type="file" id="fileInput" accept=".json" style="display: none;">
+                    </div>
+                </div>
+                <p class="subtitle">Automação & Resiliência</p>
+            </div>
+
+            <div class="controls-section">
+                <div class="control-group">
+                    <label for="filterSelect">VISUALIZAR CAMADA:</label>
+                    <select id="filterSelect" class="glass-input glass-select">
+                        <option value="all">Todas as Conexões (WAN + LAN)</option>
+                        <option value="wan">Apenas WAN (Rede Core)</option>
+                        <option value="lan">Apenas LAN (Acesso)</option>
+                    </select>
+                </div>
+                <div class="control-group" style="margin-top: 10px;">
+                    <label style="font-size: 12px; display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                        <input type="checkbox" id="ospfToggle" checked>
+                        Utilizar caminho mais veloz (OSPF)
+                    </label>
+                </div>
+            </div>
+
+            <hr class="divider">
+
+            <div class="simulation-section">
+                <h3>Simulação de Pacote</h3>
+                <div class="control-group">
+                    <label for="sourceSelect">ORIGEM:</label>
+                    <select id="sourceSelect" class="glass-input glass-select"></select>
+                </div>
+                <div class="control-group">
+                    <label for="targetSelect">DESTINO:</label>
+                    <select id="targetSelect" class="glass-input glass-select"></select>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px; margin-top: 10px;">
+                    <button id="simulateBtn" class="primary-btn glow-effect" style="flex: 1;">
+                        <i data-lucide="play"></i> Simular Rota
+                    </button>
+                    <label style="font-size: 12px; display: flex; align-items: center; gap: 5px; cursor: pointer; border: 1px solid var(--panel-border); padding: 8px; border-radius: 8px;">
+                        <input type="checkbox" id="continuousRouteCheck"> Repetir
+                    </label>
+                </div>
+                <button id="broadcastBtn" class="secondary-btn glow-effect" style="margin-top: 10px; border-color: var(--accent); color: var(--accent);">
+                    <i data-lucide="radio"></i> Enviar Broadcast
+                </button>
+                <div style="display: flex; gap: 8px; margin-top: 10px;">
+                    <button id="stressTestBtn" class="secondary-btn glow-effect" style="flex: 1;">
+                        <i data-lucide="activity"></i> Tráfego Contínuo
+                    </button>
+                    <button id="stressSettingsBtn" class="icon-btn" title="Configurações de Tráfego" style="border: 1px solid var(--panel-border); border-radius: 8px;">
+                        <i data-lucide="settings"></i>
+                    </button>
+                </div>
+            </div>
+
+            <hr class="divider">
+
+            <div class="builder-section">
+                <h3>Modo Construtor <small>(Arraste para o mapa)</small></h3>
+                <div class="builder-tools">
+                    <div class="draggable-item" draggable="true" data-type="router">
+                        <i data-lucide="cpu"></i> Roteador
+                    </div>
+                    <div class="draggable-item" draggable="true" data-type="device">
+                        <i data-lucide="monitor"></i> Dispositivo
+                    </div>
+                </div>
+                <p style="font-size: 11px; color: var(--text-muted); margin-top: 5px;">* <b>SHIFT + Arrastar</b> de um nó a outro para criar cabos.</p>
+                <p style="font-size: 11px; color: var(--text-muted);">* <b>Clique</b> num roteador para desligá-lo.</p>
+                <p style="font-size: 11px; color: var(--text-muted);">* <b>Botão Direito</b> para Tabela RIPv2 ou Excluir.</p>
+                <p style="font-size: 11px; color: var(--text-muted);">* <b>Delete</b> exclui o nó selecionado.</p>
+            </div>
+
+            <hr class="divider">
+
+            <div class="info-accordion">
+                <div class="accordion-item active">
+                    <button class="accordion-header">
+                        <i data-lucide="info"></i> Como Funciona?
+                    </button>
+                    <div class="accordion-content">
+                        <p>Esta rede utiliza o protocolo <strong>OSPF</strong>. O caminho é definido pela Velocidade (Largura de Banda) do cabo (Fibra é mais rápido que Rádio).</p>
+                        <p><strong>Resiliência:</strong> Temos rotas redundantes. Clique num link para <span class="text-danger">"quebrá-lo"</span> e simule novamente para ver o desvio!</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="statusAlert" class="status-alert hidden"></div>
+        </aside>
+
+        <main class="topology-container">
+            <div id="tooltip" class="glass-tooltip hidden"></div>
+            
+            <div id="dashboardPanel" class="glass-panel" style="position: absolute; top: 20px; right: 20px; z-index: 10; padding: 10px; min-width: 150px;">
+                <h4 style="margin: 0 0 10px 0; color: var(--accent); display: flex; align-items: center; gap: 5px;"><i data-lucide="bar-chart-2"></i> Dashboard</h4>
+                <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 5px;">Carga Máx. Nó: <span id="dashMaxLoad">0</span> pkt/s</div>
+                <div style="font-size: 12px; color: var(--text-muted);">Tráfego Ativo: <span id="dashActiveTraff">0</span></div>
+            </div>
+
+            <svg id="networkSvg" viewBox="0 0 1000 700" preserveAspectRatio="xMidYMid meet"></svg>
+            <div class="zoom-controls glass-panel">
+                <button class="icon-btn" id="zoomIn" title="Aumentar Zoom"><i data-lucide="zoom-in"></i></button>
+                <button class="icon-btn" id="zoomOut" title="Diminuir Zoom"><i data-lucide="zoom-out"></i></button>
+                <button class="icon-btn" id="zoomReset" title="Resetar Visualização"><i data-lucide="maximize"></i></button>
+            </div>
+            
+            <div id="terminalContainer" class="terminal-container glass-panel">
+                <div class="terminal-header">
+                    <span><i data-lucide="terminal"></i> Console de Tráfego</span>
+                    <button id="toggleTerminal" class="icon-btn" title="Minimizar"><i data-lucide="chevron-down"></i></button>
+                </div>
+                <div id="terminalOutput" class="terminal-output"></div>
+                <div class="terminal-input-wrapper" style="display: flex; align-items: center; background: rgba(0,0,0,0.4); padding: 8px 12px; border-top: 1px solid var(--panel-border); font-family: monospace;">
+                    <span style="color: var(--success); margin-right: 8px; font-weight: bold;">user@simulador:~$</span>
+                    <input type="text" id="terminalInput" placeholder="ping PC-A" style="background: transparent; border: none; color: #fff; font-family: inherit; font-size: 13px; outline: none; flex: 1;">
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal Tabela de Roteamento -->
+    <div id="routingModal" class="modal hidden">
+        <div class="modal-content glass-panel">
+            <div class="modal-header">
+                <h3 id="routingModalTitle">Tabela de Roteamento</h3>
+                <button id="closeModalBtn" class="icon-btn"><i data-lucide="x"></i></button>
+            </div>
+            <div class="modal-body">
+                <table class="routing-table">
+                    <thead>
+                        <tr>
+                            <th>Destino</th>
+                            <th>Próximo Salto (Gateway)</th>
+                            <th>Métrica (Saltos)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="routingTableBody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Configurações Stress Test -->
+    <div id="settingsModal" class="modal hidden">
+        <div class="modal-content glass-panel" style="max-width: 400px;">
+            <div class="modal-header">
+                <h3>Opções de Tráfego Contínuo</h3>
+                <button id="closeSettingsBtn" class="icon-btn"><i data-lucide="x"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="control-group">
+                    <label>Velocidade do Pacote (ms)</label>
+                    <input type="range" id="speedSlider" min="200" max="2000" step="100" value="400" class="glass-input">
+                    <span id="speedValue" style="font-size: 12px; color: var(--accent);">400ms</span>
+                </div>
+                <div class="control-group" style="margin-top: 15px;">
+                    <label>Volume Simultâneo (Pacotes)</label>
+                    <input type="range" id="volumeSlider" min="1" max="20" step="1" value="1" class="glass-input">
+                    <span id="volumeValue" style="font-size: 12px; color: var(--accent);">1 pacote(s)</span>
+                </div>
+                <div class="control-group" style="margin-top: 15px;">
+                    <label>Intervalo de Disparo (ms)</label>
+                    <input type="range" id="intervalSlider" min="100" max="3000" step="100" value="1500" class="glass-input">
+                    <span id="intervalValue" style="font-size: 12px; color: var(--accent);">1500ms</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Menu de Contexto Customizado -->
+    <div id="contextMenu" class="glass-panel hidden" style="position: absolute; z-index: 1000; border-radius: 8px; padding: 5px; min-width: 150px;">
+        <button id="ctxRoutingTable" class="context-btn"><i data-lucide="table"></i> Tabela de Roteamento</button>
+        <button id="ctxRenameNode" class="context-btn"><i data-lucide="edit-2"></i> Renomear</button>
+        <button id="ctxDeleteNode" class="context-btn" style="color: var(--danger);"><i data-lucide="trash-2"></i> Excluir Nó</button>
+    </div>
+
+    
+    <script type="module" src="/src/main.js"></script>
+</body>
+
+</html>
