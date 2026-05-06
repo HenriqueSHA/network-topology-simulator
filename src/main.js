@@ -157,15 +157,39 @@ document.addEventListener("DOMContentLoaded", () => {
     // Configuração de Estresse
     document.getElementById('stressTestBtn').addEventListener('click', () => simulation.toggleStressTest());
 
-    // Toggle de Protocolo (OSPF / RIPv2)
+    // Toggle de Protocolo (OSPF / RIPv2) - Sincroniza TUDO
+    const protocolDescriptions = {
+        ospf: 'O caminho é definido pela Velocidade (Largura de Banda) do cabo (Fibra é mais rápido que Rádio).',
+        rip: 'O caminho é definido pela contagem de saltos (hops). O menor número de roteadores até o destino vence, independente da velocidade do cabo.'
+    };
+
     document.getElementById('ospfToggle').addEventListener('change', (e) => {
-        const title = document.getElementById('protocolTitle');
-        const badge = document.getElementById('dashProtocolBadge');
         const isOspf = e.target.checked;
-        title.textContent = isOspf ? 'OSPF' : 'RIPv2';
+        const protocolName = isOspf ? 'OSPF' : 'RIPv2';
+
+        // 1. Título da sidebar
+        const title = document.getElementById('protocolTitle');
+        title.textContent = protocolName;
         title.style.color = isOspf ? 'var(--secondary)' : 'var(--primary)';
+
+        // 2. Label da checkbox
+        const toggleLabel = document.getElementById('ospfToggleLabel');
+        if (toggleLabel) {
+            toggleLabel.innerHTML = isOspf
+                ? 'Caminho mais veloz — <strong>OSPF</strong>'
+                : 'Menor nº de saltos — <strong>RIPv2</strong>';
+        }
+
+        // 3. Accordion "Como Funciona?"
+        const infoName = document.getElementById('infoProtocolName');
+        const infoDesc = document.getElementById('infoProtocolDesc');
+        if (infoName) infoName.textContent = protocolName;
+        if (infoDesc) infoDesc.textContent = isOspf ? protocolDescriptions.ospf : protocolDescriptions.rip;
+
+        // 4. Badge do Dashboard
+        const badge = document.getElementById('dashProtocolBadge');
         if (badge) {
-            badge.textContent = isOspf ? 'OSPF' : 'RIPv2';
+            badge.textContent = protocolName;
             badge.style.background = isOspf ? 'rgba(139, 92, 246, 0.2)' : 'rgba(59, 130, 246, 0.2)';
             badge.style.color = isOspf ? 'var(--secondary)' : 'var(--primary)';
             badge.style.borderColor = isOspf ? 'rgba(139, 92, 246, 0.3)' : 'rgba(59, 130, 246, 0.3)';

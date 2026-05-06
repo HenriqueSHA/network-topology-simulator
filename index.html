@@ -50,7 +50,7 @@
                 <div class="control-group" style="margin-top: 10px;">
                     <label style="font-size: 12px; display: flex; align-items: center; gap: 6px; cursor: pointer;">
                         <input type="checkbox" id="ospfToggle" checked>
-                        Utilizar caminho mais veloz (OSPF)
+                        <span id="ospfToggleLabel">Caminho mais veloz — <strong>OSPF</strong></span>
                     </label>
                 </div>
             </div>
@@ -113,8 +113,8 @@
                     <button class="accordion-header">
                         <i data-lucide="info"></i> Como Funciona?
                     </button>
-                    <div class="accordion-content">
-                        <p>Esta rede utiliza o protocolo <strong>OSPF</strong>. O caminho é definido pela Velocidade (Largura de Banda) do cabo (Fibra é mais rápido que Rádio).</p>
+                    <div class="accordion-content" id="protocolInfoContent">
+                        <p>Esta rede utiliza o protocolo <strong id="infoProtocolName">OSPF</strong>. <span id="infoProtocolDesc">O caminho é definido pela Velocidade (Largura de Banda) do cabo (Fibra é mais rápido que Rádio).</span></p>
                         <p><strong>Resiliência:</strong> Temos rotas redundantes. Clique num link para <span class="text-danger">"quebrá-lo"</span> e simule novamente para ver o desvio!</p>
                     </div>
                 </div>
