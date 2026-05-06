@@ -89,16 +89,34 @@ export class StorageManager {
                     linksData.length = 0;
                     
                     parsed.nodes.forEach(n => {
-                        nodesData.push({
+                        const nodeObj = {
                             id: n.id,
                             type: n.type,
                             desc: n.desc || '',
-                            offline: n.offline || false,
-                            x: n.x,
-                            y: n.y,
-                            fx: n.fx !== undefined ? n.fx : null,
-                            fy: n.fy !== undefined ? n.fy : null
-                        });
+                            offline: n.offline || false
+                        };
+                        
+                        // Garante que x e y sejam números válidos; caso contrário, deixa o D3 inicializá-los
+                        if (typeof n.x === 'number' && !isNaN(n.x)) {
+                            nodeObj.x = n.x;
+                        }
+                        if (typeof n.y === 'number' && !isNaN(n.y)) {
+                            nodeObj.y = n.y;
+                        }
+                        
+                        // Valida fx e fy
+                        if (typeof n.fx === 'number' && !isNaN(n.fx)) {
+                            nodeObj.fx = n.fx;
+                        } else {
+                            nodeObj.fx = null;
+                        }
+                        if (typeof n.fy === 'number' && !isNaN(n.fy)) {
+                            nodeObj.fy = n.fy;
+                        } else {
+                            nodeObj.fy = null;
+                        }
+                        
+                        nodesData.push(nodeObj);
                     });
 
                     parsed.links.forEach(l => {
