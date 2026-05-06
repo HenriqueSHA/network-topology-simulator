@@ -13,7 +13,7 @@
         <aside class="sidebar glass-panel">
             <div class="sidebar-header">
                 <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <h2>Topologia <span class="neon-text">OSPF</span></h2>
+                    <h2>Topologia <span id="protocolTitle" class="neon-text">OSPF</span></h2>
                     <div class="history-controls">
                         <button id="undoBtn" class="icon-btn" title="Desfazer" disabled><i data-lucide="undo-2"></i></button>
                         <button id="redoBtn" class="icon-btn" title="Refazer" disabled><i data-lucide="redo-2"></i></button>
@@ -33,6 +33,12 @@
                         <option value="wan">Apenas WAN (Rede Core)</option>
                         <option value="lan">Apenas LAN (Acesso)</option>
                     </select>
+                </div>
+                <div class="control-group" style="margin-top: 10px;">
+                    <label style="font-size: 12px; display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                        <input type="checkbox" id="ospfToggle" checked>
+                        Utilizar caminho mais veloz (OSPF)
+                    </label>
                 </div>
             </div>
 

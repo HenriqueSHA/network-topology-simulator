@@ -118,8 +118,14 @@ document.addEventListener("DOMContentLoaded", () => {
         simulation.runBroadcast(sourceSelect.value);
     });
     
-    document.getElementById('stressTestBtn').addEventListener('click', () => {
-        simulation.toggleStressTest();
+    // Configuração de Estresse
+    document.getElementById('stressTestBtn').addEventListener('click', () => simulation.toggleStressTest());
+
+    // Toggle de Protocolo (OSPF / RIPv2)
+    document.getElementById('ospfToggle').addEventListener('change', (e) => {
+        const title = document.getElementById('protocolTitle');
+        title.textContent = e.target.checked ? 'OSPF' : 'RIPv2';
+        title.style.color = e.target.checked ? 'var(--secondary)' : 'var(--primary)';
     });
 
     // Configurações do Stress Test

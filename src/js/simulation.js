@@ -105,14 +105,19 @@ export class PacketSimulation {
             if(!n.offline) adj[n.id] = [];
         });
         
+        const useOspf = document.getElementById('ospfToggle').checked;
+
         linksData.filter(l => !l.broken).forEach(l => {
             let s = typeof l.source === 'object' ? l.source.id : l.source;
             let t = typeof l.target === 'object' ? l.target.id : l.target;
             
-            // Weight based on bandwidth (if fast = 1, normal = 5, slow = 20)
-            let weight = 5; // default
-            if(l.bandwidth === 'fast' || l.type === 'lan') weight = 1;
-            if(l.bandwidth === 'slow') weight = 20;
+            // Weight based on bandwidth if OSPF is enabled
+            let weight = 1; // Default RIPv2 (hop count)
+            if (useOspf) {
+                weight = 5; // normal OSPF cost
+                if(l.bandwidth === 'fast' || l.type === 'lan') weight = 1;
+                if(l.bandwidth === 'slow') weight = 20;
+            }
 
             if(adj[s] && adj[t]) {
                 adj[s].push({ node: t, weight: weight });
@@ -197,7 +202,10 @@ export class PacketSimulation {
             return;
         }
 
-        if(!isBackground) this.terminal.log(`ROTA (OSPF): ${startId} -> ${endId} (${path.length - 1} saltos)`, "info");
+        const useOspf = document.getElementById('ospfToggle').checked;
+        const protocolName = useOspf ? 'OSPF' : 'RIPv2';
+
+        if(!isBackground) this.terminal.log(`ROTA (${protocolName}): ${startId} -> ${endId} (${path.length - 1} saltos)`, "info");
 
         const pathNodes = path.map(id => nodesData.find(n => n.id === id));
         
