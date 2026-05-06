@@ -10,7 +10,13 @@
 
 <body>
     <div id="app" class="dark-theme">
-        <aside class="sidebar glass-panel">
+        <!-- Floating Show Sidebar Button -->
+        <button id="showSidebarBtn" class="icon-btn glass-panel" style="position: absolute; top: 20px; left: 20px; z-index: 5; display: none; padding: 10px;" title="Mostrar Menu">
+            <i data-lucide="menu"></i>
+        </button>
+
+        <!-- Sidebar -->
+        <aside class="sidebar glass-panel" id="mainSidebar">
             <div class="sidebar-header">
                 <div style="display: flex; justify-content: space-between; align-items: center;">
                     <h2>Topologia <span id="protocolTitle" class="neon-text">OSPF</span></h2>
@@ -19,6 +25,7 @@
                         <button id="redoBtn" class="icon-btn" title="Refazer" disabled><i data-lucide="redo-2"></i></button>
                         <button id="saveBtn" class="icon-btn" title="Salvar Projeto"><i data-lucide="save"></i></button>
                         <button id="loadBtn" class="icon-btn" title="Carregar Projeto"><i data-lucide="upload"></i></button>
+                        <button id="hideSidebarBtn" class="icon-btn" style="margin-left: 5px; color: var(--danger);" title="Ocultar Menu"><i data-lucide="panel-left-close"></i></button>
                         <input type="file" id="fileInput" accept=".json" style="display: none;">
                     </div>
                 </div>
@@ -129,7 +136,10 @@
             <div id="terminalContainer" class="terminal-container glass-panel">
                 <div class="terminal-header">
                     <span><i data-lucide="terminal"></i> Console de Tráfego</span>
-                    <button id="toggleTerminal" class="icon-btn" title="Minimizar"><i data-lucide="chevron-down"></i></button>
+                    <button id="toggleTerminal" class="icon-btn" title="Minimizar">
+                        <i data-lucide="chevron-down" id="iconTermDown"></i>
+                        <i data-lucide="chevron-up" id="iconTermUp" style="display: none;"></i>
+                    </button>
                 </div>
                 <div id="terminalOutput" class="terminal-output"></div>
                 <div class="terminal-input-wrapper" style="display: flex; align-items: center; background: rgba(0,0,0,0.4); padding: 8px 12px; border-top: 1px solid var(--panel-border); font-family: monospace;">

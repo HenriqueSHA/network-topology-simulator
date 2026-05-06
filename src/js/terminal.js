@@ -6,11 +6,9 @@ export class Terminal {
 
         this.toggleBtn.addEventListener('click', () => {
             this.container.classList.toggle('minimized');
-            const icon = this.container.classList.contains('minimized') ? 'chevron-up' : 'chevron-down';
-            this.toggleBtn.innerHTML = `<i data-lucide="${icon}"></i>`;
-            if(window.lucide) {
-                window.lucide.createIcons({root: this.toggleBtn});
-            }
+            const isMin = this.container.classList.contains('minimized');
+            document.getElementById('iconTermDown').style.display = isMin ? 'none' : 'inline-block';
+            document.getElementById('iconTermUp').style.display = isMin ? 'inline-block' : 'none';
         });
 
         this.input = document.getElementById('terminalInput');
