@@ -344,6 +344,7 @@ export class NetworkTopology {
 
         this.node = nodeEnter.merge(nodeSelection);
         this.node.attr("class", d => `node-group ${d.offline ? 'node-offline' : ''}`);
+        this.node.select(".node-label").text(d => d.id);
 
         this.simulation.nodes(filteredNodes);
         this.simulation.force("link").links(filteredLinks);
