@@ -497,11 +497,12 @@ body {
   z-index: 20;
 }
 .terminal-container.minimized {
-  height: 40px;
+  height: 44px;
+  overflow: hidden;
 }
 .terminal-header {
   background: rgba(0, 0, 0, 0.3);
-  padding: 8px 12px;
+  padding: 6px 12px;
   border-bottom: 1px solid var(--panel-border);
   display: flex;
   justify-content: space-between;
@@ -509,6 +510,9 @@ body {
   font-size: 12px;
   font-weight: 600;
   color: var(--text-muted);
+}
+.terminal-header .icon-btn {
+  padding: 4px;
 }
 .terminal-output {
   flex: 1;
