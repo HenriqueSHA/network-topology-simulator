@@ -31,7 +31,7 @@
                         <button id="redoBtn" class="icon-btn" title="Refazer" disabled><i data-lucide="redo-2"></i></button>
                         <button id="saveBtn" class="icon-btn" title="Salvar Projeto"><i data-lucide="save"></i></button>
                         <button id="loadBtn" class="icon-btn" title="Carregar Projeto"><i data-lucide="upload"></i></button>
-                        <button id="hideSidebarBtn" class="icon-btn" style="margin-left: 4px; color: var(--danger);" title="Recolher Painel"><i data-lucide="panel-left-close"></i></button>
+                        <button id="hideSidebarBtn" class="icon-btn sidebar-close-btn" title="Recolher Painel">×</button>
                         <input type="file" id="fileInput" accept=".json" style="display: none;">
                     </div>
                 </div>
@@ -184,7 +184,10 @@
             <div id="terminalContainer" class="terminal-container glass-panel">
                 <div class="terminal-header">
                     <span><i data-lucide="terminal"></i> Console de Tráfego</span>
-                    <button id="toggleTerminal" class="icon-btn" title="Minimizar"><i data-lucide="chevron-down"></i></button>
+                    <button id="toggleTerminal" class="icon-btn terminal-toggle-btn" title="Minimizar/Restaurar">
+                        <svg class="term-icon-down" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                        <svg class="term-icon-up" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;"><polyline points="18 15 12 9 6 15"></polyline></svg>
+                    </button>
                 </div>
                 <div id="terminalOutput" class="terminal-output"></div>
                 <div class="terminal-input-wrapper" style="display: flex; align-items: center; background: rgba(0,0,0,0.4); padding: 8px 12px; border-top: 1px solid var(--panel-border); font-family: monospace;">
