@@ -78,6 +78,25 @@ document.addEventListener("DOMContentLoaded", () => {
         topology.updateGraph(e.target.value);
     });
 
+    // Sidebar Toggles
+    const mainSidebar = document.getElementById('mainSidebar');
+    const showSidebarBtn = document.getElementById('showSidebarBtn');
+    const hideSidebarBtn = document.getElementById('hideSidebarBtn');
+
+    if(hideSidebarBtn && mainSidebar && showSidebarBtn) {
+        hideSidebarBtn.addEventListener('click', () => {
+            mainSidebar.classList.add('hidden');
+            setTimeout(() => {
+                showSidebarBtn.style.display = 'block';
+            }, 300); // Aguarda animação terminar
+        });
+
+        showSidebarBtn.addEventListener('click', () => {
+            showSidebarBtn.style.display = 'none';
+            mainSidebar.classList.remove('hidden');
+        });
+    }
+
     // Simulador e Stress Test
     const sourceSelect = document.getElementById('sourceSelect');
     const targetSelect = document.getElementById('targetSelect');

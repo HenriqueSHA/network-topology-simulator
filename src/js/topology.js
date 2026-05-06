@@ -209,12 +209,10 @@ export class NetworkTopology {
             .style("stroke-width", "15px")
             .style("cursor", "pointer")
             .on("click", (event, d) => {
-                if(d.type === 'wan') {
-                    d.broken = !d.broken;
-                    if(this.history) this.history.saveState();
-                    this.updateGraph();
-                    this.showStatus(`Link ${d.source.id || d.source} - ${d.target.id || d.target} ${d.broken ? 'DERRUBADO!' : 'RESTABELECIDO'}`, d.broken ? 'error' : 'info');
-                }
+                d.broken = !d.broken;
+                if(this.history) this.history.saveState();
+                this.updateGraph();
+                this.showStatus(`Link ${d.source.id || d.source} - ${d.target.id || d.target} ${d.broken ? 'DERRUBADO!' : 'RESTABELECIDO'}`, d.broken ? 'error' : 'info');
             })
             .on("contextmenu", (event, d) => {
                 event.preventDefault();
