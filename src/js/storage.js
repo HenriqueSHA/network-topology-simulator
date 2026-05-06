@@ -1,4 +1,5 @@
 import { nodesData, linksData } from './data.js';
+import { openInputModal } from './customModal.js';
 
 export class StorageManager {
     constructor(topology, history) {
@@ -12,17 +13,61 @@ export class StorageManager {
         document.getElementById('fileInput').addEventListener('change', (e) => this.loadProject(e));
     }
 
-    saveProject() {
+    async saveProject() {
+        const defaultFilename = `topologia_rede_${Date.now()}.json`;
+        const chosenFilename = await openInputModal({
+            title: 'Salvar Projeto',
+            description: 'Digite o nome do arquivo sob o qual deseja salvar sua topologia atual.',
+            label: 'Nome do Arquivo:',
+            defaultValue: defaultFilename,
+            placeholder: 'Ex: topologia_core.json'
+        });
+
+        if (chosenFilename === null) return; // Cancelou
+
+        let finalName = chosenFilename.trim();
+        if (!finalName.endsWith('.json')) {
+            finalName += '.json';
+        }
+
         const data = {
             nodes: nodesData,
             links: linksData
         };
-        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const jsonData = JSON.stringify(data, null, 2);
+
+        // Se o navegador suporta a API de File System moderna, permite escolher a pasta nativamente!
+        if (window.showSaveFilePicker) {
+            try {
+                const handle = await window.showSaveFilePicker({
+                    suggestedName: finalName,
+                    types: [{
+                        description: 'JSON Topology File',
+                        accept: {
+                            'application/json': ['.json'],
+                        },
+                    }],
+                });
+                const writable = await handle.createWritable();
+                await writable.write(jsonData);
+                await writable.close();
+                this.topology.showStatus("Topologia salva com sucesso!", "success");
+                return;
+            } catch (err) {
+                if (err.name === 'AbortError') {
+                    return; // Cancelado pelo usuário na caixa de diálogo nativa
+                }
+                // Em caso de outro erro, faz fallback para o download tradicional abaixo
+            }
+        }
+
+        // Fallback para download tradicional caso a API moderna não seja suportada
+        const blob = new Blob([jsonData], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
         
         const a = document.createElement('a');
         a.href = url;
-        a.download = `topologia_ospf_${Date.now()}.json`;
+        a.download = finalName;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);

@@ -97,8 +97,8 @@ body {
 
 /* Sidebar Layout */
 .sidebar {
-  width: 320px;
-  min-width: 320px;
+  width: 350px;
+  min-width: 350px;
   height: 100%;
   padding: 24px;
   box-sizing: border-box;
@@ -109,12 +109,13 @@ body {
   z-index: 10;
   border-right: 1px solid var(--panel-border);
   overflow-y: auto;
+  overflow-x: hidden;
   scrollbar-gutter: stable;
   transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .sidebar.hidden {
-  margin-left: -320px;
+  margin-left: -350px;
 }
 
 .sidebar-header h2 {
