@@ -552,9 +552,10 @@ body {
 /* Botão de fechar sidebar */
 .sidebar-close-btn {
   position: absolute;
-  top: 24px;
+  top: 35px;
+  left: 320px;
   right: 24px;
-  font-size: 22px;
+  font-size: 30px;
   font-weight: 700;
   color: var(--danger);
   line-height: 1;
