@@ -78,10 +78,38 @@ document.addEventListener("DOMContentLoaded", () => {
         topology.updateGraph(e.target.value);
     });
 
-    // Simulador e Stress Test
+    // === Sidebar Toggle ===
+    const mainSidebar = document.getElementById('mainSidebar');
+    const miniToolbar = document.getElementById('miniToolbar');
+    const hideSidebarBtn = document.getElementById('hideSidebarBtn');
+    const showSidebarBtn = document.getElementById('showSidebarBtn');
+
+    if (hideSidebarBtn && mainSidebar && miniToolbar) {
+        hideSidebarBtn.addEventListener('click', () => {
+            mainSidebar.classList.add('hidden');
+            setTimeout(() => {
+                miniToolbar.style.display = 'flex';
+            }, 300);
+        });
+
+        showSidebarBtn.addEventListener('click', () => {
+            miniToolbar.style.display = 'none';
+            mainSidebar.classList.remove('hidden');
+        });
+    }
+
+    // === Simulador e Stress Test ===
     const sourceSelect = document.getElementById('sourceSelect');
     const targetSelect = document.getElementById('targetSelect');
     
+    const runSimulation = () => {
+        simulation.run(sourceSelect.value, targetSelect.value, false);
+    };
+
+    const runBroadcast = () => {
+        simulation.runBroadcast(sourceSelect.value);
+    };
+
     let continuousRouteTimer = null;
     document.getElementById('simulateBtn').addEventListener('click', () => {
         const btn = document.getElementById('simulateBtn');
@@ -95,7 +123,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         const isContinuous = document.getElementById('continuousRouteCheck').checked;
-        simulation.run(sourceSelect.value, targetSelect.value, false);
+        runSimulation();
         
         if (isContinuous) {
             btn.innerHTML = `<i data-lucide="square"></i> Parar Repetição`;
@@ -109,23 +137,39 @@ document.addEventListener("DOMContentLoaded", () => {
                     if(window.lucide) window.lucide.createIcons({root: btn});
                     return;
                 }
-                simulation.run(sourceSelect.value, targetSelect.value, false);
-            }, 2500); // Envia um pacote novo a cada 2.5s
+                runSimulation();
+            }, 2500);
         }
     });
     
-    document.getElementById('broadcastBtn').addEventListener('click', () => {
-        simulation.runBroadcast(sourceSelect.value);
-    });
+    document.getElementById('broadcastBtn').addEventListener('click', runBroadcast);
     
+    // Mini Toolbar Bindings
+    document.getElementById('miniSimulateBtn').addEventListener('click', runSimulation);
+    document.getElementById('miniBroadcastBtn').addEventListener('click', runBroadcast);
+    document.getElementById('miniSaveBtn').addEventListener('click', () => {
+        document.getElementById('saveBtn').click();
+    });
+    document.getElementById('miniLoadBtn').addEventListener('click', () => {
+        document.getElementById('loadBtn').click();
+    });
+
     // Configuração de Estresse
     document.getElementById('stressTestBtn').addEventListener('click', () => simulation.toggleStressTest());
 
     // Toggle de Protocolo (OSPF / RIPv2)
     document.getElementById('ospfToggle').addEventListener('change', (e) => {
         const title = document.getElementById('protocolTitle');
-        title.textContent = e.target.checked ? 'OSPF' : 'RIPv2';
-        title.style.color = e.target.checked ? 'var(--secondary)' : 'var(--primary)';
+        const badge = document.getElementById('dashProtocolBadge');
+        const isOspf = e.target.checked;
+        title.textContent = isOspf ? 'OSPF' : 'RIPv2';
+        title.style.color = isOspf ? 'var(--secondary)' : 'var(--primary)';
+        if (badge) {
+            badge.textContent = isOspf ? 'OSPF' : 'RIPv2';
+            badge.style.background = isOspf ? 'rgba(139, 92, 246, 0.2)' : 'rgba(59, 130, 246, 0.2)';
+            badge.style.color = isOspf ? 'var(--secondary)' : 'var(--primary)';
+            badge.style.borderColor = isOspf ? 'rgba(139, 92, 246, 0.3)' : 'rgba(59, 130, 246, 0.3)';
+        }
     });
 
     // Configurações do Stress Test
@@ -161,4 +205,32 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
     }
+
+    // === Dashboard Updater ===
+    function updateDashboard() {
+        const totalNodes = nodesData.length;
+        const totalLinks = linksData.length;
+        const brokenLinks = linksData.filter(l => l.broken).length;
+        const onlineRouters = nodesData.filter(n => n.type === 'router' && !n.offline).length;
+        const fiberCount = linksData.filter(l => l.bandwidth === 'fast').length;
+        const copperCount = linksData.filter(l => !l.bandwidth || l.bandwidth === 'normal').length;
+        const radioCount = linksData.filter(l => l.bandwidth === 'slow').length;
+
+        const set = (id, val) => { const el = document.getElementById(id); if(el) el.textContent = val; };
+        set('dashTotalNodes', totalNodes);
+        set('dashTotalLinks', totalLinks);
+        set('dashBrokenLinks', brokenLinks);
+        set('dashOnlineRouters', onlineRouters);
+        set('dashFiberCount', fiberCount);
+        set('dashCopperCount', copperCount);
+        set('dashRadioCount', radioCount);
+    }
+
+    // Atualizar dashboard quando o grafo muda
+    const originalOnGraphUpdated = topology.onGraphUpdated;
+    topology.onGraphUpdated = () => {
+        if (originalOnGraphUpdated) originalOnGraphUpdated();
+        updateDashboard();
+    };
+    updateDashboard();
 });

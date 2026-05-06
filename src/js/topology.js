@@ -165,11 +165,13 @@ export class NetworkTopology {
     }
 
     getRouterPath() {
-        return "M 0,-18 L 15,-9 L 15,9 L 0,18 L -15,9 L -15,-9 Z";
+        // Router icon: hexágono com setas de rede nas 4 direções
+        return "M 0,-18 L 15,-9 L 15,9 L 0,18 L -15,9 L -15,-9 Z M -7,0 L -12,0 M 7,0 L 12,0 M 0,-7 L 0,-12 M 0,7 L 0,12";
     }
 
     getDevicePath() {
-        return "M -12,-10 L 12,-10 L 12,10 L -12,10 Z";
+        // Device icon: monitor com base
+        return "M -14,-12 L 14,-12 L 14,6 L -14,6 Z M -8,6 L -8,10 L 8,10 L 8,6 M -10,10 L 10,10";
     }
 
     updateGraph(filterType = this.currentFilter) {
