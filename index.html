@@ -10,10 +10,16 @@
 
 <body>
     <div id="app" class="dark-theme">
-        <!-- Floating Show Sidebar Button -->
-        <button id="showSidebarBtn" class="icon-btn glass-panel" style="position: absolute; top: 20px; left: 20px; z-index: 5; display: none; padding: 10px;" title="Mostrar Menu">
-            <i data-lucide="menu"></i>
-        </button>
+        <!-- Mini Toolbar (visível quando sidebar está recolhida) -->
+        <div id="miniToolbar" class="mini-toolbar glass-panel" style="display: none;">
+            <button id="showSidebarBtn" class="icon-btn" title="Abrir Painel"><i data-lucide="menu"></i></button>
+            <hr class="mini-divider">
+            <button id="miniSimulateBtn" class="icon-btn" title="Simular Rota"><i data-lucide="play"></i></button>
+            <button id="miniBroadcastBtn" class="icon-btn" title="Broadcast"><i data-lucide="radio"></i></button>
+            <hr class="mini-divider">
+            <button id="miniSaveBtn" class="icon-btn" title="Salvar"><i data-lucide="save"></i></button>
+            <button id="miniLoadBtn" class="icon-btn" title="Carregar"><i data-lucide="upload"></i></button>
+        </div>
 
         <!-- Sidebar -->
         <aside class="sidebar glass-panel" id="mainSidebar">
@@ -25,7 +31,7 @@
                         <button id="redoBtn" class="icon-btn" title="Refazer" disabled><i data-lucide="redo-2"></i></button>
                         <button id="saveBtn" class="icon-btn" title="Salvar Projeto"><i data-lucide="save"></i></button>
                         <button id="loadBtn" class="icon-btn" title="Carregar Projeto"><i data-lucide="upload"></i></button>
-                        <button id="hideSidebarBtn" class="icon-btn" style="margin-left: 5px; color: var(--danger);" title="Ocultar Menu"><i data-lucide="panel-left-close"></i></button>
+                        <button id="hideSidebarBtn" class="icon-btn sidebar-close-btn" title="Recolher Painel">×</button>
                         <input type="file" id="fileInput" accept=".json" style="display: none;">
                     </div>
                 </div>
@@ -44,7 +50,7 @@
                 <div class="control-group" style="margin-top: 10px;">
                     <label style="font-size: 12px; display: flex; align-items: center; gap: 6px; cursor: pointer;">
                         <input type="checkbox" id="ospfToggle" checked>
-                        Utilizar caminho mais veloz (OSPF)
+                        <span id="ospfToggleLabel">Caminho mais veloz — <strong>OSPF</strong></span>
                     </label>
                 </div>
             </div>
@@ -120,10 +126,52 @@
         <main class="topology-container">
             <div id="tooltip" class="glass-tooltip hidden"></div>
             
-            <div id="dashboardPanel" class="glass-panel" style="position: absolute; top: 20px; right: 20px; z-index: 10; padding: 10px; min-width: 150px;">
-                <h4 style="margin: 0 0 10px 0; color: var(--accent); display: flex; align-items: center; gap: 5px;"><i data-lucide="bar-chart-2"></i> Dashboard</h4>
-                <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 5px;">Carga Máx. Nó: <span id="dashMaxLoad">0</span> pkt/s</div>
-                <div style="font-size: 12px; color: var(--text-muted);">Tráfego Ativo: <span id="dashActiveTraff">0</span></div>
+            <div id="dashboardPanel" class="dashboard-panel glass-panel">
+                <div class="dash-header">
+                    <h4><i data-lucide="bar-chart-2"></i> Dashboard</h4>
+                    <span id="dashProtocolBadge" class="dash-badge">OSPF</span>
+                </div>
+                <div class="dash-grid">
+                    <div class="dash-stat">
+                        <span class="dash-stat-value" id="dashTotalNodes">0</span>
+                        <span class="dash-stat-label">Nós</span>
+                    </div>
+                    <div class="dash-stat">
+                        <span class="dash-stat-value" id="dashTotalLinks">0</span>
+                        <span class="dash-stat-label">Links</span>
+                    </div>
+                    <div class="dash-stat">
+                        <span class="dash-stat-value dash-stat-danger" id="dashBrokenLinks">0</span>
+                        <span class="dash-stat-label">Quebrados</span>
+                    </div>
+                    <div class="dash-stat">
+                        <span class="dash-stat-value dash-stat-success" id="dashOnlineRouters">0</span>
+                        <span class="dash-stat-label">Online</span>
+                    </div>
+                </div>
+                <hr class="divider" style="margin: 8px 0;">
+                <div class="dash-details">
+                    <div class="dash-detail-row">
+                        <span>Carga Máx. Nó</span>
+                        <span id="dashMaxLoad" class="dash-detail-val">0 pkt/s</span>
+                    </div>
+                    <div class="dash-detail-row">
+                        <span>Tráfego Ativo</span>
+                        <span id="dashActiveTraff" class="dash-detail-val">0</span>
+                    </div>
+                    <div class="dash-detail-row">
+                        <span>Fibra</span>
+                        <span id="dashFiberCount" class="dash-detail-val" style="color: #06b6d4;">0</span>
+                    </div>
+                    <div class="dash-detail-row">
+                        <span>Cobre</span>
+                        <span id="dashCopperCount" class="dash-detail-val" style="color: #64748b;">0</span>
+                    </div>
+                    <div class="dash-detail-row">
+                        <span>Rádio</span>
+                        <span id="dashRadioCount" class="dash-detail-val" style="color: #d97706;">0</span>
+                    </div>
+                </div>
             </div>
 
             <svg id="networkSvg" viewBox="0 0 1000 700" preserveAspectRatio="xMidYMid meet"></svg>
@@ -136,9 +184,9 @@
             <div id="terminalContainer" class="terminal-container glass-panel">
                 <div class="terminal-header">
                     <span><i data-lucide="terminal"></i> Console de Tráfego</span>
-                    <button id="toggleTerminal" class="icon-btn" title="Minimizar">
-                        <i data-lucide="chevron-down" id="iconTermDown"></i>
-                        <i data-lucide="chevron-up" id="iconTermUp" style="display: none;"></i>
+                    <button id="toggleTerminal" class="icon-btn terminal-toggle-btn" title="Minimizar/Restaurar">
+                        <svg class="term-icon-down" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                        <svg class="term-icon-up" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;"><polyline points="18 15 12 9 6 15"></polyline></svg>
                     </button>
                 </div>
                 <div id="terminalOutput" class="terminal-output"></div>
@@ -201,44 +249,37 @@
     </div>
 
     <!-- Menu de Contexto Customizado -->
-    <div id="contextMenu" class="glass-panel hidden" style="position: absolute; z-index: 1000; border-radius: 8px; padding: 5px; min-width: 180px;">
+    <div id="contextMenu" class="glass-panel hidden" style="position: absolute; z-index: 1000; border-radius: 8px; padding: 5px; min-width: 150px;">
         <button id="ctxRoutingTable" class="context-btn"><i data-lucide="table"></i> Tabela de Roteamento</button>
         <button id="ctxRenameNode" class="context-btn"><i data-lucide="edit-2"></i> Renomear</button>
-        <button id="ctxChangeIp" class="context-btn"><i data-lucide="activity"></i> Alterar IP do Link</button>
+        <button id="ctxChangeIp" class="context-btn"><i data-lucide="settings"></i> Alterar IP do Link</button>
         <button id="ctxDeleteNode" class="context-btn" style="color: var(--danger);"><i data-lucide="trash-2"></i> Excluir Nó</button>
     </div>
 
-    <!-- Modal de Input Customizado (substitui prompt nativo) -->
+
+    <!-- Modal de Entrada Customizado (glassmorphism) -->
     <div id="customInputModal" class="modal hidden">
         <div class="modal-content glass-panel" style="max-width: 420px;">
             <div class="modal-header">
                 <h3 id="customInputTitle">Entrada</h3>
                 <button id="customInputCloseBtn" class="icon-btn"><i data-lucide="x"></i></button>
             </div>
-            <div class="modal-body">
-                <p id="customInputDescription" style="color: var(--text-muted); font-size: 13px; margin: 0 0 16px 0;"></p>
-                
-                <!-- Modo Input de Texto -->
-                <div id="customInputTextGroup" class="control-group">
-                    <label id="customInputLabel" for="customInputField">Valor:</label>
-                    <input type="text" id="customInputField" class="glass-input" placeholder="" autocomplete="off">
-                </div>
-
-                <!-- Modo Select (para velocidade do cabo) -->
-                <div id="customInputSelectGroup" class="control-group" style="display: none;">
-                    <label id="customSelectLabel" for="customSelectField">Opção:</label>
-                    <select id="customSelectField" class="glass-input glass-select"></select>
-                </div>
-
-                <div style="display: flex; gap: 10px; margin-top: 20px; justify-content: flex-end;">
-                    <button id="customInputCancelBtn" class="secondary-btn" style="width: auto; padding: 10px 24px; font-size: 14px;">Cancelar</button>
-                    <button id="customInputConfirmBtn" class="primary-btn" style="width: auto; padding: 10px 24px; font-size: 14px;">Confirmar</button>
-                </div>
+            <p id="customInputDescription" style="font-size: 13px; color: var(--text-muted); margin: 0 0 12px 0;"></p>
+            <div id="customInputTextGroup" style="display: flex; flex-direction: column; gap: 6px;">
+                <label id="customInputLabel" style="font-size: 12px; color: var(--text-muted);">Valor:</label>
+                <input type="text" id="customInputField" class="glass-input" style="width: 100%; padding: 10px 14px; font-size: 14px;">
+            </div>
+            <div id="customInputSelectGroup" style="display: none; flex-direction: column; gap: 6px;">
+                <label id="customSelectLabel" style="font-size: 12px; color: var(--text-muted);">Selecione:</label>
+                <select id="customSelectField" class="glass-input glass-select" style="width: 100%; padding: 10px 14px; font-size: 14px;"></select>
+            </div>
+            <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px;">
+                <button id="customInputCancelBtn" class="icon-btn" style="padding: 8px 18px; border-radius: 8px; font-size: 13px; color: var(--text-muted);">Cancelar</button>
+                <button id="customInputConfirmBtn" class="icon-btn" style="padding: 8px 18px; border-radius: 8px; font-size: 13px; background: var(--primary); color: #fff;">Confirmar</button>
             </div>
         </div>
     </div>
 
-    
     <script type="module" src="/src/main.js"></script>
 </body>
 

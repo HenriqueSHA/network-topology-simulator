@@ -7,8 +7,10 @@ export class Terminal {
         this.toggleBtn.addEventListener('click', () => {
             this.container.classList.toggle('minimized');
             const isMin = this.container.classList.contains('minimized');
-            document.getElementById('iconTermDown').style.display = isMin ? 'none' : 'inline-block';
-            document.getElementById('iconTermUp').style.display = isMin ? 'inline-block' : 'none';
+            const iconDown = this.toggleBtn.querySelector('.term-icon-down');
+            const iconUp = this.toggleBtn.querySelector('.term-icon-up');
+            if (iconDown) iconDown.style.display = isMin ? 'none' : 'block';
+            if (iconUp) iconUp.style.display = isMin ? 'block' : 'none';
         });
 
         this.input = document.getElementById('terminalInput');
